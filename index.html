@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BancaClick CR - Sucursal Electrónica</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background-color: #f4f6f9; color: #333; display: flex; flex-direction: column; min-height: 100vh; position: relative; }
+        
+        /* BARRA SIMULADA DE NAVEGADOR (SEÑAL DE RED FLAG) */
+        .fake-url-bar { background-color: #e0e0e0; padding: 6px 15px; font-size: 13px; color: #555; border-bottom: 1px solid #ccc; display: flex; align-items: center; }
+        .fake-url-bar span { background: #fff; padding: 2px 10px; border-radius: 4px; border: 1px solid #bbb; width: 100%; max-width: 480px; display: inline-block; margin-left: 8px; color: #d93025; font-weight: bold; }
+
+        /* CABECERA SUPERIOR */
+        header { background-color: #ffffff; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e5e5; }
+        .brand-container { display: flex; align-items: center; gap: 12px; }
+        .brand-logo { font-size: 32px; font-weight: 900; color: #d93025; letter-spacing: -0.5px; border-right: 2px solid #ccc; padding-right: 12px; }
+        .brand-sub { color: #d93025; font-size: 20px; font-weight: 700; }
+        .header-right { display: flex; align-items: center; gap: 20px; font-size: 18px; color: #555; }
+
+        /* BARRA TIPO DE CAMBIO SIMULADA */
+        .exchange-bar { background-color: #ffffff; border-bottom: 1px solid #e0e0e0; padding: 8px 40px; font-size: 12px; color: #555; display: flex; gap: 25px; align-items: center; }
+        .exchange-item { display: flex; gap: 8px; }
+        .exchange-title { font-weight: bold; color: #0f62fe; }
+
+        /* CONTENEDOR PRINCIPAL CON TARJETA FLOTANTE */
+        .main-content { flex: 1; display: flex; justify-content: center; align-items: center; padding: 40px 20px; background: radial-gradient(circle, #ffffff 0%, #edf1f5 100%); position: relative; }
+        
+        .login-card { background: #ffffff; width: 100%; max-width: 460px; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); padding: 35px 30px; position: relative; }
+        
+        /* BANNER DE URGENCIA */
+        .urgent-banner { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px 12px; font-size: 12px; color: #856404; margin-bottom: 20px; border-radius: 2px; line-height: 1.4; }
+
+        .card-header { text-align: center; margin-bottom: 25px; }
+        .card-header h2 { font-size: 20px; font-weight: 600; color: #222; margin-top: 5px; }
+        .card-header p { font-size: 13px; color: #666; margin-top: 4px; }
+
+        /* FORMULARIO */
+        .method-selector { display: flex; gap: 20px; font-size: 13px; margin-bottom: 20px; }
+        .method-selector label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 600; color: #444; margin-bottom: 6px; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; outline: none; transition: border 0.2s; }
+        .form-group input:focus { border-color: #0f62fe; }
+
+        .options-group { display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #555; margin-bottom: 22px; }
+        .options-group label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+
+        .btn-primary { width: 100%; background-color: #0f62fe; color: white; border: none; padding: 12px; border-radius: 4px; font-size: 15px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        .btn-primary:hover { background-color: #054ada; }
+
+        /* BOTÓN AYUDA FLOTANTE */
+        .floating-help { position: fixed; bottom: 70px; right: 25px; background: #ffffff; border: 1px solid #ccc; padding: 10px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; color: #333; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; display: flex; align-items: center; gap: 8px; }
+
+        /* PANTALLA INTERMEDIA DE VACIADO SIMULADO */
+        .theft-animation { text-align: center; color: #d93025; }
+        .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 45px; height: 45px; border-radius: 50%; border-left-color: #d93025; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .money-counter { font-size: 32px; font-weight: bold; margin: 15px 0; color: #222; }
+
+        /* PANTALLA FINAL EDUCATIVA */
+        .educational-screen { display: none; max-width: 780px; border-top: 8px solid #d93025; }
+        .educational-header { color: #d93025; font-size: 22px; font-weight: bold; margin-bottom: 12px; }
+        .grid-eval { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; text-align: left; }
+        .box-info { background: #f9f9f9; padding: 15px; border-radius: 6px; border: 1px solid #eee; }
+        .box-info h4 { color: #0f62fe; margin-bottom: 8px; font-size: 14px; }
+        .box-info ul { padding-left: 18px; font-size: 13px; line-height: 1.5; }
+
+        /* PIE DE PÁGINA BANCO FICTICIO */
+        footer { background-color: #d93025; color: white; padding: 12px 20px; font-size: 12px; text-align: center; }
+        footer a { color: white; text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <!-- CABECERA -->
+    <header>
+        <div class="brand-container">
+        <img src="mi_logo.png" alt="Logo" style="height: 120px; width: auto; margin-right: 1px;">
+            <div class="brand-logo">BAC</div>
+            <div class="brand-sub">Banca en Línea</div>
+        </div>
+        <div class="header-right">
+            <span>🔍 Ayuda</span>
+            <span>🇨🇷 CR ▾</span>
+        </div>
+    </header>
+
+    <!-- BARRA TIPO DE CAMBIO -->
+    <div class="exchange-bar">
+        <div class="exchange-title"> Tipo de Cambio:</div>
+        <div class="exchange-item"><span>Dólares:</span> Compra ₡446.00 / Venta ₡460.00</div>
+        <div class="exchange-item"><span>Euros:</span> Compra ₡506.76 / Venta ₡526.15</div>
+    </div>
+
+    <!-- ÁREA CENTRAL -->
+    <div class="main-content">
+
+        <!-- PANTALLA 1: INGRESO DE CREDENCIALES Y TOKEN -->
+        <div class="login-card" id="screen1">
+            <div class="urgent-banner">
+                <strong>ALERTA DE SEGURIDAD (10 min restantes):</strong> Su Token Digital requiere sincronización obligatoria para evitar el bloqueo del servicio.
+            </div>
+
+            <div class="card-header">
+                <p>Le damos la bienvenida a</p>
+                <h2>Banca en Línea</h2>
+            </div>
+
+            <div class="method-selector">
+                <label><input type="radio" name="method" checked> Contraseña</label>
+                <label><input type="radio" name="method"> Firma Digital</label>
+            </div>
+
+            <div class="form-group">
+                <label>Usuario</label>
+                <input type="text" id="txtUser" placeholder="Ingrese su usuario">
+            </div>
+
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="txtPass" placeholder="Ingrese su contraseña">
+            </div>
+
+            <div class="options-group">
+                <label><input type="checkbox"> Recordar Usuario</label>
+                <label><input type="checkbox" id="chkToken" checked onclick="toggleTokenField()"> Usar Token Digital</label>
+            </div>
+
+            <div class="form-group" id="tokenGroup">
+                <label>Código de Token Digital (6 dígitos)</label>
+                <input type="text" id="txtToken" maxlength="6" placeholder="000000" autocomplete="off">
+            </div>
+
+            <button class="btn-primary" onclick="startSimulatedTheft()">Ingresar</button>
+        </div>
+
+        <!-- PANTALLA 2: ANIMACIÓN DE ROBO DE FONDOS -->
+        <div class="login-card" id="screenTheft" style="display: none;">
+            <div class="theft-animation">
+                <h3>⚠️ INTERCEPCIÓN EN PROCESO</h3>
+                <p style="color: #666; font-size: 13px; margin-top: 5px;">Sincronizando claves recibidas y procesando débito...</p>
+                <div class="spinner"></div>
+                <p style="color: #555; font-size: 13px;">Saldo disponible en cuenta:</p>
+                <div class="money-counter" id="countdownMoney">₡850,000</div>
+                <p style="font-size: 12px; font-weight: bold; color: #d93025;">Transfiriendo saldo a cuenta IBAN de terceros no autorizada...</p>
+            </div>
+        </div>
+
+        <!-- PANTALLA 3: CIERRE EDUCATIVO INTERACTIVO -->
+        <div class="login-card educational-screen" id="screenEducational">
+            <div class="educational-header">⚠️ ¡ALERTA: ESTO FUE UNA SIMULACIÓN EDUCATIVA!</div>
+            <p style="font-size: 14px; line-height: 1.5; color: #444;">
+                Si este hubiese sido un portal de phishing real, tus credenciales y tu Token de un solo uso habrían sido capturados para <strong>vaciar completamente tus cuentas bancarias en segundos</strong>.
+            </p>
+            
+            <div class="grid-eval">
+                <div class="box-info">
+                    <h4>🔍 Elementos de Confianza Simulados</h4>
+                    <ul>
+                        <li><strong>Distribución profesional:</strong> Uso de tarjetas flotantes, tipografías limpias y barras de tipos de cambio.</li>
+                        <li><strong>Sensación de normalidad:</strong> Opciones para elegir "Firma Digital", "Recordar usuario" o casillas de Token.</li>
+                    </ul>
+                </div>
+                <div class="box-info">
+                    <h4>🚨 Red Flags Clave a Detectar</h4>
+                    <ul>
+                        <li><strong>Dirección URL:</strong> El dominio finaliza en <code>.org</code> en lugar de dominios oficiales bancarios.</li>
+                        <li><strong>Presión de tiempo:</strong> Avisos de urgencia exigiendo actualizar el Token en minutos.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- BOTÓN DE AYUDA SIMULADO -->
+    <div class="floating-help">
+        🔍 ¿Necesita ayuda para ingresar?
+    </div>
+
+    <!-- PIE DE PÁGINA -->
+    <footer>
+        Todos los derechos reservados. 2026 © BancaClick International Bank. <a href="#">Términos y condiciones</a>.
+    </footer>
+
+    <script>
+        function toggleTokenField() {
+            var chk = document.getElementById('chkToken');
+            var group = document.getElementById('tokenGroup');
+            group.style.display = chk.checked ? 'block' : 'none';
+        }
+
+        function startSimulatedTheft() {
+            var user = document.getElementById('txtUser').value;
+            var pass = document.getElementById('txtPass').value;
+            var token = document.getElementById('txtToken').value;
+
+            if(user.trim() === "" || pass.trim() === "" || token.trim() === "") { 
+                alert("Por favor, ingrese sus datos para continuar."); 
+                return; 
+            }
+            
+            document.getElementById('screen1').style.display = 'none';
+            document.getElementById('screenTheft').style.display = 'block';
+            
+            var currentMoney = 850000;
+            var counterElement = document.getElementById('countdownMoney');
+            
+            var interval = setInterval(function() {
+                currentMoney -= 50000;
+                if(currentMoney <= 0) {
+                    currentMoney = 0;
+                    clearInterval(interval);
+                    setTimeout(function() {
+                        document.getElementById('screenTheft').style.display = 'none';
+                        document.getElementById('screenEducational').style.display = 'block';
+                    }, 1000);
+                }
+                counterElement.innerText = "₡" + currentMoney.toLocaleString('es-CR');
+            }, 120);
+        }
+    </script>
+</body>
+</html>
